@@ -1,0 +1,731 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SLC Tiling: Premier wall and floor tiling in Birmingham, UK. 10 years tiling experience, 15 years in building trade, 9.7/10 Checkatrade rating. Call 07552973019 for a free quote.">
+    <meta name="keywords" content="Birmingham tiling services, wall tiling, floor tiling, kitchen tiling, bathroom tiling, West Midlands, SLC Tiling">
+    <meta name="author" content="SLC Tiling">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="SLC Tiling - Birmingham’s Premier Tiling Experts">
+    <meta property="og:description" content="Transform your space with expert tiling in Birmingham. 10 years tiling experience, 9.7/10 Checkatrade rating. Call 07552973019.">
+    <meta property="og:image" content="https://via.placeholder.com/1200x630?text=SLC+Tiling+Birmingham">
+    <meta property="og:url" content="https://slctiling.netlify.app">
+    <meta property="og:type" content="website">
+    <title>SLC Tiling - Birmingham’s Premier Tiling Experts</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tailwindcss/typography@0.5.9/dist/typography.min.css">
+    <style>
+        html { scroll-behavior: smooth; }
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .before-after-container {
+            position: relative;
+            overflow: hidden;
+        }
+        .before-after-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .before-after-slider {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 4px;
+            height: 100%;
+            background: #fff;
+            cursor: ew-resize;
+            z-index: 10;
+        }
+        .before-after-before {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 50%;
+            overflow: hidden;
+        }
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            border: 4px solid white;
+        }
+        #quote-popup {
+            transition: opacity 0.3s ease-in-out;
+        }
+        .chat-widget, .whatsapp-widget, .back-to-top {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background: #1e3a8a;
+            color: white;
+            padding: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 50;
+            transition: transform 0.3s ease;
+        }
+        .chat-widget:hover, .whatsapp-widget:hover, .back-to-top:hover {
+            transform: scale(1.1);
+        }
+        .whatsapp-widget { bottom: 140px; background: #25D366; }
+        .back-to-top { bottom: 200px; display: none; }
+        .back-to-top.visible { display: block; }
+        .hero-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+        .hero-overlay {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7));
+            position: relative;
+        }
+        .floating-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e3a8a;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 9999px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 50;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.05); }
+            100% { transform: translateX(-50%) scale(1); }
+        }
+        button:focus, a:focus {
+            outline: 2px solid #facc15;
+            outline-offset: 2px;
+        }
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
+    </style>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": "SLC Tiling",
+        "telephone": "07552973019",
+        "email": "contact@slctiling.co.uk",
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Birmingham",
+            "addressRegion": "West Midlands",
+            "addressCountry": "UK"
+        },
+        "description": "Premier wall and floor tiling in Birmingham with 10 years tiling experience, 15 years in building trade, and a 9.7/10 Checkatrade rating.",
+        "url": "https://slctiling.netlify.app",
+        "sameAs": [
+            "https://www.instagram.com/slctiling/",
+            "https://www.checkatrade.com/trades/slctiling1100375"
+        ],
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "9.7",
+            "reviewCount": "9"
+        },
+        "founder": {
+            "@type": "Person",
+            "name": "Stephen Seeney"
+        }
+    }
+    </script>
+</head>
+<body class="font-sans text-gray-800 bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-gray-900 text-white p-4 sticky top-0 z-50 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="#home" class="text-2xl font-bold tracking-tight">SLC Tiling</a>
+            <div class="hidden md:flex space-x-6">
+                <a href="#home" class="hover:text-yellow-400 transition-colors">Home</a>
+                <a href="#about" class="hover:text-yellow-400 transition-colors">About</a>
+                <a href="#services" class="hover:text-yellow-400 transition-colors">Services</a>
+                <a href="#portfolio" class="hover:text-yellow-400 transition-colors">Portfolio</a>
+                <a href="#testimonials" class="hover:text-yellow-400 transition-colors">Reviews</a>
+                <a href="#contact" class="hover:text-yellow-400 transition-colors">Contact</a>
+            </div>
+            <button class="md:hidden focus:outline-none" aria-label="Toggle menu" onclick="toggleMenu()">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                </svg>
+            </button>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden bg-gray-900 text-white p-4">
+            <a href="#home" class="block py-2 hover:text-yellow-400 transition-colors">Home</a>
+            <a href="#about" class="block py-2 hover:text-yellow-400 transition-colors">About</a>
+            <a href="#services" class="block py-2 hover:text-yellow-400 transition-colors">Services</a>
+            <a href="#portfolio" class="block py-2 hover:text-yellow-400 transition-colors">Portfolio</a>
+            <a href="#testimonials" class="block py-2 hover:text-yellow-400 transition-colors">Reviews</a>
+            <a href="#contact" class="block py-2 hover:text-yellow-400 transition-colors">Contact</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-overlay h-screen flex items-center justify-center text-center text-white fade-in relative">
+        <video autoplay muted loop class="hero-video" poster="https://via.placeholder.com/1920x1080?text=SLC+Tiling+Birmingham">
+            <source src="https://via.placeholder.com/1920x1080.mp4?text=Tiling+Showcase" type="video/mp4">
+        </video>
+        <div class="container mx-auto px-4 py-12 rounded-lg">
+            <h1 class="text-4xl md:text-6xl font-bold mb-4">Transform Your Space with SLC Tiling</h1>
+            <p class="text-lg md:text-2xl mb-6 max-w-2xl mx-auto prose">Birmingham’s trusted tiling experts with 10 years experience, 15 years in building trade, and a 9.7/10 Checkatrade rating.</p>
+            <div class="flex justify-center space-x-4">
+                <button onclick="toggleQuotePopup()" class="bg-yellow-400 text-gray-900 px-8 py-4 rounded-lg hover:bg-yellow-500 transition-colors animate-pulse">Get a Free Quote Now</button>
+                <a href="#portfolio" class="bg-transparent border border-white px-8 py-4 rounded-lg hover:bg-white hover:text-gray-900 transition-colors">View Our Work</a>
+            </div>
+            <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                <div>
+                    <p class="text-3xl font-bold">9.7/10</p>
+                    <p class="text-sm">Checkatrade Rating</p>
+                    <a href="https://www.checkatrade.com/trades/slctiling1100375" class="text-yellow-400 hover:underline text-sm" target="_blank">See Reviews</a>
+                </div>
+                <div>
+                    <p class="text-3xl font-bold">500+</p>
+                    <p class="text-sm">Projects Completed</p>
+                </div>
+                <div>
+                    <p class="text-3xl font-bold">15+</p>
+                    <p class="text-sm">Years in Building Trade</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-16 bg-gray-50 fade-in">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-8">Our Story</h2>
+            <p class="text-center mb-12 max-w-2xl mx-auto prose">Founded by Stephen Seeney, SLC Tiling brings 10 years of tiling expertise and 15 years in the building trade to Birmingham. With over 500 projects and a 9.7/10 Checkatrade rating, we’re committed to quality and customer satisfaction.</p>
+            <div class="text-center mb-8">
+                <video controls poster="https://via.placeholder.com/800x450?text=Our+Story+Video" class="w-full max-w-2xl mx-auto rounded-lg">
+                    <source src="https://via.placeholder.com/800x450.mp4?text=Our+Story" type="video/mp4">
+                </video>
+                <p class="text-sm mt-2 prose">Watch Stephen Seeney share our passion for tiling.</p>
+            </div>
+            <div class="text-center">
+                <a href="https://www.instagram.com/slctiling/" class="text-blue-600 hover:text-yellow-400 transition-colors" target="_blank">Follow us on Instagram @slctiling</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="py-16 fade-in">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-8">Our Tiling Services</h2>
+            <p class="text-center mb-12 max-w-2xl mx-auto prose">Expert tiling for homes and businesses in Birmingham, Solihull, and the West Midlands.</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="text-center bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+                    <img src="https://via.placeholder.com/300x200?text=Kitchen+Tiling" alt="Kitchen Tiling Services" class="w-full h-48 object-cover mb-4 rounded lazy" loading="lazy">
+                    <h3 class="text-xl font-semibold mb-2">Kitchen Tiling</h3>
+                    <p class="mb-4 prose">Stylish splashbacks and durable floors for your kitchen.</p>
+                    <button onclick="toggleQuotePopup()" class="text-blue-600 hover:text-yellow-400 transition-colors">Enquire Now</button>
+                </div>
+                <div class="text-center bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+                    <img src="https://via.placeholder.com/300x200?text=Bathroom+Tiling" alt="Bathroom Tiling Services" class="w-full h-48 object-cover mb-4 rounded lazy" loading="lazy">
+                    <h3 class="text-xl font-semibold mb-2">Bathroom Tiling</h3>
+                    <p class="mb-4 prose">Waterproof, elegant tiling for walls and wetrooms.</p>
+                    <button onclick="toggleQuotePopup()" class="text-blue-600 hover:text-yellow-400 transition-colors">Enquire Now</button>
+                </div>
+                <div class="text-center bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+                    <img src="https://via.placeholder.com/300x200?text=Floor+Tiling" alt="Floor Tiling Services" class="w-full h-48 object-cover mb-4 rounded lazy" loading="lazy">
+                    <h3 class="text-xl font-semibold mb-2">Floor Tiling</h3>
+                    <p class="mb-4 prose">Precision tiles for hallways, patios, and living areas.</p>
+                    <button onclick="toggleQuotePopup()" class="text-blue-600 hover:text-yellow-400 transition-colors">Enquire Now</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section id="portfolio" class="py-16 bg-gray-100 fade-in">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-8">Our Recent Projects</h2>
+            <p class="text-center mb-12 max-w-2xl mx-auto prose">Explore our craftsmanship across Birmingham and the West Midlands.</p>
+            <div id="portfolio-slider" class="relative flex overflow-hidden">
+                <div class="flex transition-transform duration-500" id="project-container">
+                    <!-- Projects dynamically inserted here -->
+                </div>
+            </div>
+            <div class="flex justify-center space-x-4 mt-4">
+                <button onclick="prevPortfolio()" class="bg-gray-200 p-2 rounded-full hover:bg-gray-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <button onclick="nextPortfolio()" class="bg-gray-200 p-2 rounded-full hover:bg-gray-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </button>
+            </div>
+            <div id="lightbox" class="lightbox" onclick="closeLightbox()">
+                <img src="" alt="Project Image">
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="py-16 fade-in">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-8">What Our Clients Say</h2>
+            <p class="text-center mb-12 max-w-2xl mx-auto prose">Rated 9.7/10 on <a href="https://www.checkatrade.com/trades/slctiling1100375" class="text-blue-600 hover:underline" target="_blank">Checkatrade</a>.</p>
+            <div id="testimonial-slider" class="relative flex overflow-hidden">
+                <div class="flex transition-transform duration-500" id="review-container">
+                    <!-- Reviews dynamically inserted here -->
+                </div>
+            </div>
+            <div class="flex justify-center space-x-4 mt-4">
+                <button onclick="prevTestimonial()" class="bg-gray-200 p-2 rounded-full hover:bg-gray-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <button onclick="nextTestimonial()" class="bg-gray-200 p-2 rounded-full hover:bg-gray-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Commitment Section -->
+    <section id="commitment" class="py-16 bg-gray-50 fade-in">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-8">Our Promise to You</h2>
+            <p class="text-center mb-12 max-w-2xl mx-auto prose">With a 9.7/10 Checkatrade rating, we ensure top-quality tiling and prompt resolution of any concerns. <a href="https://www.checkatrade.com/trades/slctiling1100375" class="text-blue-600 hover:underline" target="_blank">See our reviews</a>.</p>
+        </div>
+    </section>
+
+    <!-- Shop Placeholder Section -->
+    <section id="shop" class="py-16 bg-gray-100 fade-in">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-8">Shop Tiles & Materials (Coming Soon)</h2>
+            <p class="text-center mb-12 max-w-2xl mx-auto prose">Order premium tiles and materials soon. Contact us for current options!</p>
+            <div class="text-center">
+                <button onclick="toggleQuotePopup()" class="bg-yellow-400 text-gray-900 px-6 py-3 rounded-lg hover:bg-yellow-500 transition-colors">Enquire About Tiles</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lead Magnet Section -->
+    <section id="lead-magnet" class="py-16 fade-in">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-8">Download Our Free Tiling Guide</h2>
+            <p class="mb-12 max-w-2xl mx-auto prose">Learn expert tips for choosing the perfect tiles for your home.</p>
+            <form id="lead-form" class="max-w-md mx-auto space-y-4" data-netlify="true" name="lead">
+                <input type="hidden" name="form-name" value="lead">
+                <input type="email" name="email" placeholder="Your Email" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400" required aria-label="Email Address">
+                <button type="submit" class="bg-yellow-400 text-gray-900 px-6 py-3 rounded-lg hover:bg-yellow-500">Get Your Free Guide</button>
+            </form>
+            <p id="lead-message" class="mt-4 text-center hidden"></p>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-16 fade-in">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-8">Get Your Free Quote</h2>
+            <p class="text-center mb-12 max-w-2xl mx-auto prose">Contact SLC Tiling at 07552973019 or via WhatsApp. Limited slots this month!</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                <div class="text-center">
+                    <p class="font-semibold text-lg">Call Us</p>
+                    <p><a href="tel:07552973019" class="text-blue-600 hover:text-yellow-400 transition-colors">07552973019</a></p>
+                </div>
+                <div class="text-center">
+                    <p class="font-semibold text-lg">Email Us</p>
+                    <p><a href="mailto:contact@slctiling.co.uk" class="text-blue-600 hover:text-yellow-400 transition-colors">contact@slctiling.co.uk</a></p>
+                </div>
+                <div class="text-center">
+                    <p class="font-semibold text-lg">Follow Us</p>
+                    <p><a href="https://www.instagram.com/slctiling/" class="text-blue-600 hover:text-yellow-400 transition-colors" target="_blank">@slctiling</a></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quote Popup -->
+    <div id="quote-popup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white p-6 rounded-lg max-w-lg w-full mx-4">
+            <h3 class="text-xl font-semibold mb-4">Request a Free Quote</h3>
+            <p class="text-sm text-gray-600 mb-4 prose">Limited slots available this month!</p>
+            <form id="contact-form" class="space-y-4" data-netlify="true" name="contact">
+                <input type="hidden" name="form-name" value="contact">
+                <input type="text" name="name" placeholder="Your Name" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400" required aria-label="Your Name">
+                <input type="tel" name="phone" placeholder="Phone Number" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400" required aria-label="Phone Number">
+                <input type="email" name="email" placeholder="Email Address" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400" required aria-label="Email Address">
+                <textarea name="message" placeholder="Tell us about your project" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 h-32" required aria-label="Project Details"></textarea>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" onclick="toggleQuotePopup()" class="bg-gray-300 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-400">Cancel</button>
+                    <button type="submit" class="bg-yellow-400 text-gray-900 px-4 py-2 rounded-lg hover:bg-yellow-500">Send</button>
+                </div>
+            </form>
+            <p id="form-message" class="mt-4 text-center hidden"></p>
+        </div>
+    </div>
+
+    <!-- Floating Action Bar -->
+    <div class="floating-bar hidden md:flex space-x-4">
+        <a href="tel:07552973019" class="bg-yellow-400 text-gray-900 px-4 py-2 rounded-full hover:bg-yellow-500">Call Now</a>
+        <button onclick="toggleQuotePopup()" class="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700">Get Quote</button>
+        <a href="https://wa.me/447552973019" class="bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600">WhatsApp</a>
+    </div>
+
+    <!-- Chat Widget Placeholder -->
+    <div class="chat-widget" onclick="openChatWidget()">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+        </svg>
+        <span class="sr-only">Open chat</span>
+    </div>
+
+    <!-- WhatsApp Widget -->
+    <a href="https://wa.me/447552973019" class="whatsapp-widget" target="_blank">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+        </svg>
+        <span class="sr-only">Contact via WhatsApp</span>
+    </a>
+
+    <!-- Back to Top Button -->
+    <a href="#home" class="back-to-top" aria-label="Back to Top">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+        </svg>
+    </a>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">About SLC Tiling</h3>
+                    <p class="prose">Led by Stephen Seeney, SLC Tiling delivers expert tiling in Birmingham. 10 years tiling experience, 15 years in building trade, 500+ projects, 9.7/10 on Checkatrade.</p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#home" class="hover:text-yellow-400 transition-colors">Home</a></li>
+                        <li><a href="#about" class="hover:text-yellow-400 transition-colors">About</a></li>
+                        <li><a href="#services" class="hover:text-yellow-400 transition-colors">Services</a></li>
+                        <li><a href="#portfolio" class="hover:text-yellow-400 transition-colors">Portfolio</a></li>
+                        <li><a href="#testimonials" class="hover:text-yellow-400 transition-colors">Reviews</a></li>
+                        <li><a href="#contact" class="hover:text-yellow-400 transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">Our Services</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#services" class="hover:text-yellow-400 transition-colors">Kitchen Tiling</a></li>
+                        <li><a href="#services" class="hover:text-yellow-400 transition-colors">Bathroom Tiling</a></li>
+                        <li><a href="#services" class="hover:text-yellow-400 transition-colors">Floor Tiling</a></li>
+                        <li><a href="#services" class="hover:text-yellow-400 transition-colors">Wall Tiling</a></li>
+                        <li><a href="#services" class="hover:text-yellow-400 transition-colors">Porcelain & Ceramic</a></li>
+                    </ul>
+                </div>
+            </div>
+            <p class="text-center mt-8 prose">© 2025 SLC Tiling. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Sample project and review data (simulating CMS fetch)
+        const projects = [
+            {
+                title: "Hexagon Feature Wall",
+                description: "Bathroom renovation in Solihull.",
+                image: "https://via.placeholder.com/300x200?text=Hexagon+Feature+Wall",
+                imageLarge: "https://via.placeholder.com/800x600?text=Hexagon+Feature+Wall",
+                location: "Solihull (B90)",
+                beforeImage: "https://via.placeholder.com/300x200?text=Before+Hexagon+Wall",
+                afterImage: "https://via.placeholder.com/300x200?text=After+Hexagon+Wall"
+            },
+            {
+                title: "Metro Tile Splashback",
+                description: "Kitchen update in Harborne.",
+                image: "https://via.placeholder.com/300x200?text=Metro+Tile+Splashback",
+                imageLarge: "https://via.placeholder.com/800x600?text=Metro+Tile+Splashback",
+                location: "Harborne (B17)",
+                beforeImage: "https://via.placeholder.com/300x200?text=Before+Metro+Tile",
+                afterImage: "https://via.placeholder.com/300x200?text=After+Metro+Tile"
+            },
+            {
+                title: "Large Format Flooring",
+                description: "Living area in Sutton Coldfield.",
+                image: "https://via.placeholder.com/300x200?text=Large+Format+Flooring",
+                imageLarge: "https://via.placeholder.com/800x600?text=Large+Format+Flooring",
+                location: "Sutton Coldfield (B76)",
+                beforeImage: "https://via.placeholder.com/300x200?text=Before+Flooring",
+                afterImage: "https://via.placeholder.com/300x200?text=After+Flooring"
+            }
+        ];
+
+        const reviews = [
+            {
+                quote: "Steve worked on multiple bathroom renovations, always informative, kept me updated, and all customers were happy. Top bloke.",
+                author: "Amar A.P. Tiling",
+                location: "B90, June 2024"
+            },
+            {
+                quote: "Amazing work on my kitchen floor in April. Clean, tidy, and professional. Will use again.",
+                author: "Verified Reviewer",
+                location: "B76, May 2024"
+            },
+            {
+                quote: "Couldn’t be happier with SLC Tiling’s work. Very helpful, polite, courteous, and cleaned up after themselves.",
+                author: "Verified Reviewer",
+                location: "B37, May 2024"
+            }
+        ];
+
+        // Populate projects
+        function renderProjects() {
+            const container = document.getElementById('project-container');
+            container.innerHTML = projects.map(project => `
+                <div class="min-w-full md:min-w-[33.333%] p-4">
+                    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                        <div class="before-after-container" onmousemove="moveSlider(event, this)" onmousedown="startDragging(event, this)" ontouchmove="moveSlider(event, this)" ontouchstart="startDragging(event, this)">
+                            <div class="before-after-before">
+                                <img src="${project.beforeImage}" alt="Before ${project.title}" class="w-full h-48 object-cover">
+                            </div>
+                            <img src="${project.afterImage}" alt="After ${project.title}" class="w-full h-48 object-cover cursor-pointer" onclick="openLightbox('${project.imageLarge}')">
+                            <div class="before-after-slider"></div>
+                        </div>
+                        <div class="p-4">
+                            <p class="font-semibold">${project.title}</p>
+                            <p class="text-sm text-gray-600">${project.location}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Populate reviews
+        function renderReviews() {
+            const container = document.getElementById('review-container');
+            container.innerHTML = reviews.map(review => `
+                <div class="min-w-full md:min-w-[33.333%] p-4">
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <p class="italic text-gray-600 prose">"${review.quote}"</p>
+                        <p class="mt-4 font-semibold">${review.author}</p>
+                        <p class="text-sm text-gray-500">${review.location}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Before/after slider functionality
+        function startDragging(e, container) {
+            container.isDragging = true;
+            moveSlider(e, container);
+        }
+
+        function moveSlider(e, container) {
+            if (!container.isDragging && e.type !== 'touchmove') return;
+            const rect = container.getBoundingClientRect();
+            let x = (e.clientX || e.touches[0].clientX) - rect.left;
+            x = Math.max(0, Math.min(x, rect.width));
+            container.querySelector('.before-after-before').style.width = `${x}px`;
+            container.querySelector('.before-after-slider').style.left = `${x}px`;
+        }
+
+        document.addEventListener('mouseup', () => {
+            document.querySelectorAll('.before-after-container').forEach(container => {
+                container.isDragging = false;
+            });
+        });
+
+        document.addEventListener('touchend', () => {
+            document.querySelectorAll('.before-after-container').forEach(container => {
+                container.isDragging = false;
+            });
+        });
+
+        // Toggle mobile menu
+        function toggleMenu() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        }
+
+        // Fade-in animation
+        const sections = document.querySelectorAll('.fade-in');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+        sections.forEach(section => observer.observe(section));
+
+        // Portfolio slider
+        let currentPortfolio = 0;
+        function updatePortfolioSlider() {
+            const slider = document.getElementById('portfolio-slider');
+            slider.style.transform = `translateX(-${currentPortfolio * 100 / (window.innerWidth >= 768 ? 3 : 1)}%)`;
+        }
+        function nextPortfolio() {
+            currentPortfolio = (currentPortfolio + 1) % projects.length;
+            updatePortfolioSlider();
+        }
+        function prevPortfolio() {
+            currentPortfolio = (currentPortfolio - 1 + projects.length) % projects.length;
+            updatePortfolioSlider();
+        }
+        setInterval(nextPortfolio, 6000);
+        window.addEventListener('resize', updatePortfolioSlider);
+
+        // Testimonial slider
+        let currentTestimonial = 0;
+        function updateTestimonialSlider() {
+            const slider = document.getElementById('testimonial-slider');
+            slider.style.transform = `translateX(-${currentTestimonial * 100 / (window.innerWidth >= 768 ? 3 : 1)}%)`;
+        }
+        function nextTestimonial() {
+            currentTestimonial = (currentTestimonial + 1) % reviews.length;
+            updateTestimonialSlider();
+        }
+        function prevTestimonial() {
+            currentTestimonial = (currentTestimonial - 1 + reviews.length) % reviews.length;
+            updateTestimonialSlider();
+        }
+        setInterval(nextTestimonial, 5000);
+        window.addEventListener('resize', updateTestimonialSlider);
+
+        // Lightbox
+        function openLightbox(src) {
+            const lightbox = document.getElementById('lightbox');
+            lightbox.querySelector('img').src = src;
+            lightbox.style.display = 'flex';
+        }
+        function closeLightbox() {
+            document.getElementById('lightbox').style.display = 'none';
+        }
+
+        // Quote popup
+        function toggleQuotePopup() {
+            const popup = document.getElementById('quote-popup');
+            popup.classList.toggle('hidden');
+        }
+        setTimeout(() => {
+            if (!document.getElementById('quote-popup').classList.contains('hidden')) return;
+            toggleQuotePopup();
+        }, 8000);
+
+        // Chat widget placeholder
+        function openChatWidget() {
+            alert('Chat feature coming soon! Call 07552973019 or use WhatsApp.');
+        }
+
+        // Form submission
+        function handleFormSubmit(formId, messageId) {
+            const form = document.getElementById(formId);
+            const message = document.getElementById(messageId);
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(form);
+                fetch('/.netlify/functions/submit-form', {
+                    method: 'POST',
+                    body: JSON.stringify(Object.fromEntries(formData))
+                }).then(response => response.json()).then(data => {
+                    message.textContent = data.message;
+                    message.classList.remove('hidden', 'text-red-600');
+                    message.classList.add('text-green-600');
+                    form.reset();
+                    setTimeout(() => {
+                        message.classList.add('hidden');
+                        if (formId === 'contact-form') toggleQuotePopup();
+                    }, 3000);
+                }).catch(() => {
+                    message.textContent = 'Error submitting form. Please try again.';
+                    message.classList.remove('hidden', 'text-green-600');
+                    message.classList.add('text-red-600');
+                });
+            });
+        }
+
+        handleFormSubmit('contact-form', 'form-message');
+        handleFormSubmit('lead-form', 'lead-message');
+
+        // Back to top
+        const backToTop = document.querySelector('.back-to-top');
+        window.addEventListener('scroll', () => {
+            backToTop.classList.toggle('visible', window.scrollY > 300);
+        });
+
+        // Show floating bar on desktop
+        window.addEventListener('load', () => {
+            renderProjects();
+            renderReviews();
+            if (window.innerWidth >= 768) {
+                document.querySelector('.floating-bar').classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
